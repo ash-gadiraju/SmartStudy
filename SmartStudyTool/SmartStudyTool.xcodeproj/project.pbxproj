@@ -94,6 +94,9 @@
 			);
 			mainGroup = CB7667172FCF91DE00F081BB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CB87D5B42FD64BA400923C16 /* XCRemoteSwiftPackageReference "FlagEmbedding" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB7667212FCF91DE00F081BB /* Products */;
 			projectDirPath = "";
@@ -331,6 +334,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CB87D5B42FD64BA400923C16 /* XCRemoteSwiftPackageReference "FlagEmbedding" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FlagOpen/FlagEmbedding.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = CB7667182FCF91DE00F081BB /* Project object */;
 }
