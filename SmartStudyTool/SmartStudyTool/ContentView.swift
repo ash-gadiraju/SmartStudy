@@ -3,6 +3,7 @@
 //  SmartStudyTool
 //  Embedder: BGE
 //  Embedder documentation: https://bge-model.com/Introduction/installation.html
+// i'M SO STUPID THE BGE THING IS PYTHON AAAAHHHH NO NOT BACKENED SOB
 //  Created by Ashritha Gadiraju on 6/2/26.
 //
 
