@@ -29,6 +29,10 @@ struct ContentView: View {
             Text("Hello, world!")
         }
         .padding()
+        
+    }
+    struct Response: Codable {
+        let response: String
     }
 }
 
