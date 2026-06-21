@@ -31,9 +31,6 @@ struct ContentView: View {
         .padding()
         
     }
-    struct Response: Codable {
-        let response: String
-    }
 }
 
 #Preview {
