@@ -11,10 +11,10 @@ import SwiftUI
 
 
 // Questionss pipeline:
-// user enters prompt for quiz --> app sends prompt to Chroma thru embedder
-// Chroma gets relevant data --> sends to app
-// app builds prompt for Ollama --> Ollama generates response for app
-// App gives user questions
+// user enters prompt for quiz --> app sends prompt to Chroma thru embedder ✅
+// Chroma gets relevant data --> sends to app ✅
+// app builds prompt for Ollama --> Ollama generates response for app ✅
+// App gives user questions ✅
 // Answers pipeline:
 // user gives answers to app --> Apps sends question, correct solution, and user answer to Ollama
 // Ollama grades --> Sends evaluation to app
