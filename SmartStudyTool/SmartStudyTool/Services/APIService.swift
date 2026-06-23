@@ -1,67 +1,91 @@
-//
-//  ContentView.swift
-//  SmartStudyTool
-//
-//  Embedder: BGE
-//  Embedder documentation: https://bge-model.com/Introduction/installation.html
-//
-//  Created by Ashritha Gadiraju on 6/2/26.
-//
-//  Pipeline overview:
-//  Questions: user prompt -> Chroma (via embedder) -> relevant context
-//             -> Ollama prompt -> generated questions -> shown to user
-//  Answers:   user answer -> Ollama (question + correct answer + user answer)
-//             -> grading -> evaluation shown to user
-//
-
 import SwiftUI
 
 // MARK: - Models
 
-/// A single response item returned by the backend.
-struct QuizResponse: Codable, Identifiable {
-    var id: String { response }
-    let response: String
+struct ChatRequest: Codable {
+    let message: String
+    let session_id: String
+}
+
+struct ChatResponse: Codable {
+    let answer: String
+    let session_id: String
+}
+
+struct ResetResponse: Codable {
+    let status: String
+    let session_id: String
 }
 
 // MARK: - Networking
 
-// Basically just allows the backend and front end to communicate via a local host
 @MainActor
 final class BackendService {
     static let shared = BackendService()
 
-    private let baseURL = URL(string: "http://localhost:8000")!
+    private let baseURL = URL(string: "http://127.0.0.1:8000")!
 
     private init() {}
 
-    // Fetches quiz items from the `/items` endpoint.
-    func fetchItems() async throws -> [QuizResponse] {
-        let url = baseURL.appendingPathComponent("items")
-        let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode([QuizResponse].self, from: data)
+    /// Sends a message to the /chat endpoint and returns the model's answer.
+    func sendChat(message: String, sessionID: String = "default") async throws -> ChatResponse {
+        let url = baseURL.appendingPathComponent("chat")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(
+            ChatRequest(message: message, session_id: sessionID)
+        )
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Optional: surface non-200s as readable errors instead of a decode failure
+        if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+            let body = String(data: data, encoding: .utf8) ?? "no body"
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Status \(http.statusCode): \(body)"])
+        }
+
+        return try JSONDecoder().decode(ChatResponse.self, from: data)
     }
 
-    // Add more endpoint calls here as the pipeline grows, e.g.:
-    // func submitAnswer(question: String, correctAnswer: String, userAnswer: String) async throws -> Evaluation
+    /// Clears a session's history on the backend.
+    func resetSession(sessionID: String = "default") async throws -> ResetResponse {
+        var url = baseURL.appendingPathComponent("reset")
+        url = url.appending(queryItems: [URLQueryItem(name: "session_id", value: sessionID)])
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        return try JSONDecoder().decode(ResetResponse.self, from: data)
+    }
 }
 
 // MARK: - View
 
 struct APIService: View {
-    @State private var items: [QuizResponse] = []
+    @State private var inputText = "Give me 3 questions on APUSH 1920-1960s major events"
+    @State private var answer: String = ""
     @State private var errorMessage: String?
+    @State private var isLoading = false
 
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-                .padding(.bottom)
+        VStack(alignment: .leading, spacing: 12) {
+            TextField("Ask something...", text: $inputText)
+                .textFieldStyle(.roundedBorder)
 
-            List(items) { item in
-                Text(item.response)
+            Button("Send") {
+                Task { await sendMessage() }
+            }
+            .disabled(isLoading)
+
+            if isLoading {
+                ProgressView()
+            }
+
+            ScrollView {
+                Text(answer)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if let errorMessage {
@@ -71,16 +95,19 @@ struct APIService: View {
             }
         }
         .padding()
-        .task {
-            await loadItems()
-        }
     }
 
-    private func loadItems() async {
+    private func sendMessage() async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
         do {
-            items = try await BackendService.shared.fetchItems()
+            let result = try await BackendService.shared.sendChat(message: inputText, sessionID: "me")
+            answer = result.answer
         } catch {
-            errorMessage = "Couldn't load items: \(error.localizedDescription)"
+            print("Full error: \(error)")
+            errorMessage = "Couldn't reach backend: \(error.localizedDescription)"
         }
     }
 }

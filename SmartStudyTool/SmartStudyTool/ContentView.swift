@@ -16,9 +16,9 @@ import SwiftUI
 // app builds prompt for Ollama --> Ollama generates response for app ✅
 // App gives user questions ✅
 // Answers pipeline:
-// user gives answers to app --> Apps sends question, correct solution, and user answer to Ollama
-// Ollama grades --> Sends evaluation to app
-// App sends evaluation and correct answers to user
+// user gives answers to app --> Apps sends question, correct solution, and user answer to Ollama✅
+// Ollama grades --> Sends evaluation to app✅
+// App sends evaluation and correct answers to user✅
 
 struct ContentView: View {
     var body: some View {
