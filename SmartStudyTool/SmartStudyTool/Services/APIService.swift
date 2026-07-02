@@ -113,5 +113,5 @@ struct APIService: View {
 }
 
 #Preview {
-    ContentView()
+    APIService()
 }
