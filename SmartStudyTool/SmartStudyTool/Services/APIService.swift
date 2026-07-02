@@ -33,6 +33,7 @@ final class BackendService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 120
         request.httpBody = try JSONEncoder().encode(
             ChatRequest(message: message, session_id: sessionID)
         )
